@@ -1,15 +1,21 @@
+import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { studySpaces } from "@/lib/mock-data";
 import { ZoneType } from "@/lib/types";
 import { useBooking } from "@/lib/booking-context";
+import { useWallet } from "@/lib/wallet-context";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Clock, CreditCard } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, CreditCard, Wallet } from "lucide-react";
+import { toast } from "sonner";
+import AddMoneyModal from "@/components/AddMoneyModal";
 
 export default function BookingPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { createBooking } = useBooking();
+  const { balance, deductMoney } = useWallet();
+  const [addMoneyOpen, setAddMoneyOpen] = useState(false);
 
   const space = studySpaces.find((s) => s.id === id);
   const zone = (searchParams.get("zone") as ZoneType) || "quiet";
@@ -18,8 +24,18 @@ export default function BookingPage() {
   if (!space) return <div className="p-4 text-center text-muted-foreground">Space not found</div>;
 
   const totalPrice = space.pricePerHour * duration;
+  const canAfford = balance >= totalPrice;
 
   const handleConfirm = () => {
+    if (totalPrice > 0) {
+      const success = deductMoney(totalPrice, `${space.name} – ${duration}h session`);
+      if (!success) {
+        toast.error("Insufficient balance");
+        setAddMoneyOpen(true);
+        return;
+      }
+      toast.success("Payment successful");
+    }
     createBooking(space, zone, duration);
     navigate("/confirmation");
   };
@@ -65,18 +81,33 @@ export default function BookingPage() {
             </div>
           </div>
 
-          {/* Mock Payment */}
+          {/* Wallet Payment */}
           <div className="bg-card rounded-lg shadow-card p-4 mb-6">
             <p className="text-label text-muted-foreground mb-3">PAYMENT</p>
-            <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
-              <div className="w-10 h-7 rounded bg-primary/10 flex items-center justify-center">
-                <CreditCard className="w-4 h-4 text-primary" />
+            <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-7 rounded bg-primary/10 flex items-center justify-center">
+                  <Wallet className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">Wallet</p>
+                  <p className="text-xs text-muted-foreground">Balance: ₹{balance}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">UPI / Card</p>
-                <p className="text-xs text-muted-foreground">Mock payment</p>
-              </div>
+              {!canAfford && totalPrice > 0 && (
+                <button
+                  onClick={() => setAddMoneyOpen(true)}
+                  className="text-xs font-semibold text-primary"
+                >
+                  Add ₹{totalPrice - balance}
+                </button>
+              )}
             </div>
+            {!canAfford && totalPrice > 0 && (
+              <p className="text-xs text-destructive mt-2">
+                Insufficient balance. Please add ₹{totalPrice - balance} to proceed.
+              </p>
+            )}
           </div>
         </motion.div>
       </div>
@@ -92,6 +123,8 @@ export default function BookingPage() {
           </button>
         </div>
       </div>
+
+      <AddMoneyModal open={addMoneyOpen} onOpenChange={setAddMoneyOpen} />
     </div>
   );
 }
