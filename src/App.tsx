@@ -10,6 +10,8 @@ import BookingPage from "./pages/BookingPage";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import CheckInPage from "./pages/CheckInPage";
 import ActiveSessionPage from "./pages/ActiveSessionPage";
+import BookingsPage from "./pages/BookingsPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +30,8 @@ const App = () => (
             <Route path="/confirmation" element={<ConfirmationPage />} />
             <Route path="/checkin" element={<CheckInPage />} />
             <Route path="/session" element={<ActiveSessionPage />} />
-            <Route path="/bookings" element={<HomePage />} />
-            <Route path="/profile" element={<HomePage />} />
+            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

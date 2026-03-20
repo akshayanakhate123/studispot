@@ -1,14 +1,15 @@
 import { StudySpace } from "@/lib/types";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Shield } from "lucide-react";
+import { MapPin, Shield, Zap } from "lucide-react";
 
 interface SpaceCardProps {
   space: StudySpace;
   index: number;
+  isBest?: boolean;
 }
 
-export default function SpaceCard({ space, index }: SpaceCardProps) {
+export default function SpaceCard({ space, index, isBest }: SpaceCardProps) {
   const navigate = useNavigate();
   const totalAvailable = space.zones.reduce((s, z) => s + z.availableSeats, 0);
 
@@ -18,8 +19,17 @@ export default function SpaceCard({ space, index }: SpaceCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
       onClick={() => navigate(`/space/${space.id}`)}
-      className="bg-card rounded-lg p-4 shadow-card hover:shadow-card-hover transition-shadow duration-200 ease-studi cursor-pointer active:scale-[0.98]"
+      className={`bg-card rounded-lg p-4 transition-shadow duration-200 ease-studi cursor-pointer active:scale-[0.98] ${
+        isBest ? "shadow-card-hover ring-1 ring-primary/20" : "shadow-card hover:shadow-card-hover"
+      }`}
     >
+      {isBest && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <Zap className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-bold text-primary">Best Option Right Now</span>
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
