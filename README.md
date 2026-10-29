@@ -316,8 +316,3 @@ Studi Spot is designed for **mobile-first** usage. Students open the app, glance
 | **Confidence Score Accuracy** | ±10% of actual availability | Trust & retention |
 | **Wallet Top-up Frequency** | 2× per active user/month | Revenue signal |
 
----
-
-## License
-
-MIT © Studi Spot
